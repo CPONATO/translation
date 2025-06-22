@@ -1,3 +1,4 @@
+// lib/screens/translation_screen.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -116,6 +117,12 @@ class _TranslationScreenState extends State<TranslationScreen>
           );
         });
         await _translationService.initializeTranslator(_currentLanguagePair);
+
+        // Show detected language
+        final info = AppConstants.languageInfo[detectedLanguage.name];
+        final languageName =
+            info?['name'] ?? detectedLanguage.name.toUpperCase();
+        _showSuccessSnackBar('Detected: $languageName');
       }
 
       await _performTranslation();
@@ -153,12 +160,56 @@ class _TranslationScreenState extends State<TranslationScreen>
     // Note: We'd need to trigger translation here for the swapped text
   }
 
+  // ✅ FIX: Logic chính ở đây
   Future<void> _startListening() async {
     if (!_speechService.speechEnabled) {
       _showErrorSnackBar('Speech recognition not available');
       return;
     }
 
+    // ✅ KEY FIX: Nếu auto-detect enabled, skip language check
+    if (_isAutoDetectEnabled) {
+      await _startListeningWithAutoDetect();
+      return;
+    }
+
+    // Manual mode: Check language support như bình thường
+    await _startListeningWithManualLanguage();
+  }
+
+  // ✅ Auto-detect mode: Always use English for speech recognition
+  Future<void> _startListeningWithAutoDetect() async {
+    setState(() {
+      _isListening = true;
+    });
+
+    // Use English as default for speech recognition in auto-detect mode
+    String localeId = 'en_US';
+
+    // If English not supported, use first available locale
+    if (!_speechService.isLocaleSupported(localeId)) {
+      if (_speechService.availableLocales.isNotEmpty) {
+        localeId = _speechService.availableLocales.first.localeId;
+      } else {
+        _showErrorSnackBar('No speech recognition available');
+        setState(() => _isListening = false);
+        return;
+      }
+    }
+
+    try {
+      await _speechService.startListening(
+        onResult: _onSpeechResultAutoDetect,
+        localeId: localeId,
+      );
+    } catch (e) {
+      _showErrorSnackBar('Failed to start listening: $e');
+      setState(() => _isListening = false);
+    }
+  }
+
+  // ✅ Manual mode: Check specific language support
+  Future<void> _startListeningWithManualLanguage() async {
     setState(() {
       _isListening = true;
     });
@@ -169,7 +220,8 @@ class _TranslationScreenState extends State<TranslationScreen>
 
     if (localeId == null || !_speechService.isLocaleSupported(localeId)) {
       _showErrorSnackBar(
-        'Speech recognition not supported for ${_currentLanguagePair.source.name}',
+        'Speech recognition not supported for ${_currentLanguagePair.source.name}.\n'
+        'Try enabling Auto-detect mode or choose another language.',
       );
       setState(() {
         _isListening = false;
@@ -190,6 +242,22 @@ class _TranslationScreenState extends State<TranslationScreen>
     }
   }
 
+  // ✅ Speech result for auto-detect mode
+  void _onSpeechResultAutoDetect(SpeechRecognitionResult result) {
+    setState(() {
+      _inputController.text = result.recognizedWords;
+      if (result.finalResult) {
+        _isListening = false;
+      }
+    });
+
+    if (result.finalResult) {
+      // Auto-detect will be triggered by the text change listener
+      _detectAndTranslate();
+    }
+  }
+
+  // ✅ Speech result for manual mode
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       _inputController.text = result.recognizedWords;
@@ -306,18 +374,37 @@ class _TranslationScreenState extends State<TranslationScreen>
       ),
       centerTitle: true,
       actions: [
-        AnimatedSwitcher(
-          duration: AppConstants.shortAnimation,
-          child: Switch(
-            key: ValueKey(_isAutoDetectEnabled),
-            value: _isAutoDetectEnabled,
-            onChanged: (value) {
-              setState(() {
-                _isAutoDetectEnabled = value;
-              });
-            },
-            activeColor: AppConstants.accentColor,
-          ),
+        Row(
+          children: [
+            Text(
+              'Auto-detect',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedSwitcher(
+              duration: AppConstants.shortAnimation,
+              child: Switch(
+                key: ValueKey(_isAutoDetectEnabled),
+                value: _isAutoDetectEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    _isAutoDetectEnabled = value;
+                  });
+
+                  if (value) {
+                    _showSuccessSnackBar('Auto-detect enabled');
+                  } else {
+                    _showSuccessSnackBar('Manual language mode');
+                  }
+                },
+                activeColor: AppConstants.accentColor,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: AppConstants.spacing),
       ],
@@ -334,56 +421,67 @@ class _TranslationScreenState extends State<TranslationScreen>
         ).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppConstants.spacing),
-          child: Column(
-            children: [
-              // Input Section
-              Expanded(
-                flex: 3,
-                child: TranslationInputCard(
-                  controller: _inputController,
-                  isListening: _isListening,
-                  onClear: () => _inputController.clear(),
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          child: Padding(
+            padding: const EdgeInsets.all(AppConstants.spacing),
+            child: Column(
+              children: [
+                // Input Section
+                Flexible(
+                  flex: 3,
+                  child: TranslationInputCard(
+                    controller: _inputController,
+                    isListening: _isListening,
+                    onClear: () => _inputController.clear(),
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: AppConstants.spacing),
+                const SizedBox(height: AppConstants.spacing),
 
-              // Language Selector
-              LanguageSelector(
-                languagePair: _currentLanguagePair,
-                onLanguagePairChanged: _onLanguagePairChanged,
-                onSwapLanguages: _swapLanguages,
-                isAutoDetectEnabled: _isAutoDetectEnabled,
-              ),
-
-              const SizedBox(height: AppConstants.spacing),
-
-              // Output Section
-              Expanded(
-                flex: 3,
-                child: TranslationOutputCard(
-                  text: _translationState.translatedText,
-                  isLoading:
-                      _translationState.status == TranslationStatus.translating,
-                  onCopy: _copyTranslation,
-                  onSpeak: _speakTranslation,
+                // Language Selector
+                SizedBox(
+                  height: 100,
+                  child: LanguageSelector(
+                    languagePair: _currentLanguagePair,
+                    onLanguagePairChanged: _onLanguagePairChanged,
+                    onSwapLanguages: _swapLanguages,
+                    isAutoDetectEnabled: _isAutoDetectEnabled,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: AppConstants.spacing),
+                const SizedBox(height: AppConstants.spacing),
 
-              // Action Buttons
-              ActionButtons(
-                isListening: _isListening,
-                onMicPressed: _isListening ? _stopListening : _startListening,
-                onCameraPressed:
-                    () => _navigateToVisionScreen(ImageSource.camera),
-                onGalleryPressed:
-                    () => _navigateToVisionScreen(ImageSource.gallery),
-              ),
-            ],
+                // Output Section
+                Flexible(
+                  flex: 3,
+                  child: TranslationOutputCard(
+                    text: _translationState.translatedText,
+                    isLoading:
+                        _translationState.status ==
+                        TranslationStatus.translating,
+                    onCopy: _copyTranslation,
+                    onSpeak: _speakTranslation,
+                  ),
+                ),
+
+                const SizedBox(height: AppConstants.spacing),
+
+                // Action Buttons
+                Container(
+                  height: 120,
+                  child: ActionButtons(
+                    isListening: _isListening,
+                    onMicPressed:
+                        _isListening ? _stopListening : _startListening,
+                    onCameraPressed:
+                        () => _navigateToVisionScreen(ImageSource.camera),
+                    onGalleryPressed:
+                        () => _navigateToVisionScreen(ImageSource.gallery),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

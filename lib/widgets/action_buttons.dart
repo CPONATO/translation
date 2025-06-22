@@ -18,7 +18,11 @@ class ActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppConstants.spacing),
+      width: double.infinity, // ✅ Full width
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12, // ✅ Reduced padding
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
         color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -31,22 +35,38 @@ class ActionButtons extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly, // ✅ Even distribution
         children: [
-          _ActionButton(
-            icon: Icons.photo_library,
-            label: 'Gallery',
-            onPressed: onGalleryPressed,
-            backgroundColor: AppConstants.secondaryColor,
+          Flexible(
+            // ✅ Use Flexible instead of fixed sizes
+            child: _ActionButton(
+              icon: Icons.photo_library,
+              label: 'Gallery',
+              onPressed: onGalleryPressed,
+              backgroundColor: AppConstants.secondaryColor,
+            ),
           ),
 
-          _MicButton(isListening: isListening, onPressed: onMicPressed),
+          const SizedBox(width: 8), // ✅ Minimal spacing
 
-          _ActionButton(
-            icon: Icons.camera_alt,
-            label: 'Camera',
-            onPressed: onCameraPressed,
-            backgroundColor: AppConstants.secondaryColor,
+          Flexible(
+            // ✅ Use Flexible for mic button too
+            child: _MicButton(
+              isListening: isListening,
+              onPressed: onMicPressed,
+            ),
+          ),
+
+          const SizedBox(width: 8), // ✅ Minimal spacing
+
+          Flexible(
+            // ✅ Use Flexible
+            child: _ActionButton(
+              icon: Icons.camera_alt,
+              label: 'Camera',
+              onPressed: onCameraPressed,
+              backgroundColor: AppConstants.secondaryColor,
+            ),
           ),
         ],
       ),
@@ -108,31 +128,41 @@ class _ActionButtonState extends State<_ActionButton>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min, // ✅ Minimize space
               children: [
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 48, // ✅ Smaller size: 56 → 48
+                  height: 48,
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
                         color: widget.backgroundColor.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 6, // ✅ Reduced blur
+                        offset: const Offset(0, 3), // ✅ Reduced offset
                       ),
                     ],
                   ),
-                  child: Icon(widget.icon, color: Colors.white, size: 24),
+                  child: Icon(
+                    widget.icon,
+                    color: Colors.white,
+                    size: 20, // ✅ Smaller icon: 24 → 20
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.label,
-                  style: TextStyle(
-                    color: AppConstants.textSecondaryColor,
-                    fontSize: AppConstants.fontSizeSmall,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(height: 6), // ✅ Reduced spacing: 8 → 6
+                Flexible(
+                  // ✅ Flexible text to prevent overflow
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      color: AppConstants.textSecondaryColor,
+                      fontSize: 11, // ✅ Smaller font: 12 → 11
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1, // ✅ Single line
+                    overflow: TextOverflow.ellipsis, // ✅ Handle overflow
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
@@ -214,50 +244,145 @@ class _MicButtonState extends State<_MicButton> with TickerProviderStateMixin {
                 _scaleAnimation.value *
                 (widget.isListening ? _pulseAnimation.value : 1.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min, // ✅ Minimize space
               children: [
                 Container(
-                  width: 72,
-                  height: 72,
+                  width: 56, // ✅ Smaller than before: 72 → 56
+                  height: 56,
                   decoration: BoxDecoration(
                     color:
                         widget.isListening
                             ? AppConstants.errorColor
                             : AppConstants.primaryColor,
-                    borderRadius: BorderRadius.circular(36),
+                    borderRadius: BorderRadius.circular(28),
                     boxShadow: [
                       BoxShadow(
                         color: (widget.isListening
                                 ? AppConstants.errorColor
                                 : AppConstants.primaryColor)
                             .withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+                        blurRadius: 8, // ✅ Reduced blur: 12 → 8
+                        offset: const Offset(0, 4), // ✅ Reduced offset: 6 → 4
                       ),
                     ],
                   ),
                   child: Icon(
                     widget.isListening ? Icons.stop : Icons.mic,
                     color: Colors.white,
-                    size: 32,
+                    size: 24, // ✅ Smaller icon: 32 → 24
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.isListening ? 'Stop' : 'Speak',
-                  style: TextStyle(
-                    color:
-                        widget.isListening
-                            ? AppConstants.errorColor
-                            : AppConstants.textSecondaryColor,
-                    fontSize: AppConstants.fontSizeSmall,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 6), // ✅ Reduced spacing: 8 → 6
+                Flexible(
+                  // ✅ Flexible text
+                  child: Text(
+                    widget.isListening ? 'Stop' : 'Speak',
+                    style: TextStyle(
+                      color:
+                          widget.isListening
+                              ? AppConstants.errorColor
+                              : AppConstants.textSecondaryColor,
+                      fontSize: 11, // ✅ Smaller font: 12 → 11
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1, // ✅ Single line
+                    overflow: TextOverflow.ellipsis, // ✅ Handle overflow
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// ✅ Alternative: Compact horizontal layout for very small screens
+class ActionButtonsCompact extends StatelessWidget {
+  final bool isListening;
+  final VoidCallback onMicPressed;
+  final VoidCallback onCameraPressed;
+  final VoidCallback onGalleryPressed;
+
+  const ActionButtonsCompact({
+    super.key,
+    required this.isListening,
+    required this.onMicPressed,
+    required this.onCameraPressed,
+    required this.onGalleryPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 60, // ✅ Fixed compact height
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppConstants.cardColor,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _CompactButton(
+            icon: Icons.photo_library,
+            onPressed: onGalleryPressed,
+          ),
+          _CompactButton(
+            icon: isListening ? Icons.stop : Icons.mic,
+            onPressed: onMicPressed,
+            isActive: isListening,
+          ),
+          _CompactButton(icon: Icons.camera_alt, onPressed: onCameraPressed),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isActive;
+
+  const _CompactButton({
+    required this.icon,
+    required this.onPressed,
+    this.isActive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: isActive ? AppConstants.errorColor : AppConstants.primaryColor,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: (isActive
+                      ? AppConstants.errorColor
+                      : AppConstants.primaryColor)
+                  .withOpacity(0.3),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
