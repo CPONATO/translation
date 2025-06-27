@@ -18,11 +18,8 @@ class ActionButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity, // ✅ Full width
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12, // ✅ Reduced padding
-        vertical: 12,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
@@ -38,7 +35,6 @@ class ActionButtons extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly, // ✅ Even distribution
         children: [
           Flexible(
-            // ✅ Use Flexible instead of fixed sizes
             child: _ActionButton(
               icon: Icons.photo_library,
               label: 'Gallery',
@@ -47,20 +43,18 @@ class ActionButtons extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 8), // ✅ Minimal spacing
+          const SizedBox(width: 8),
 
           Flexible(
-            // ✅ Use Flexible for mic button too
             child: _MicButton(
               isListening: isListening,
               onPressed: onMicPressed,
             ),
           ),
 
-          const SizedBox(width: 8), // ✅ Minimal spacing
+          const SizedBox(width: 8),
 
           Flexible(
-            // ✅ Use Flexible
             child: _ActionButton(
               icon: Icons.camera_alt,
               label: 'Camera',
@@ -128,10 +122,10 @@ class _ActionButtonState extends State<_ActionButton>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: Column(
-              mainAxisSize: MainAxisSize.min, // ✅ Minimize space
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 48, // ✅ Smaller size: 56 → 48
+                  width: 48,
                   height: 48,
                   decoration: BoxDecoration(
                     color: widget.backgroundColor,
@@ -139,29 +133,24 @@ class _ActionButtonState extends State<_ActionButton>
                     boxShadow: [
                       BoxShadow(
                         color: widget.backgroundColor.withOpacity(0.3),
-                        blurRadius: 6, // ✅ Reduced blur
-                        offset: const Offset(0, 3), // ✅ Reduced offset
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
-                  child: Icon(
-                    widget.icon,
-                    color: Colors.white,
-                    size: 20, // ✅ Smaller icon: 24 → 20
-                  ),
+                  child: Icon(widget.icon, color: Colors.white, size: 20),
                 ),
-                const SizedBox(height: 6), // ✅ Reduced spacing: 8 → 6
+                const SizedBox(height: 6),
                 Flexible(
-                  // ✅ Flexible text to prevent overflow
                   child: Text(
                     widget.label,
                     style: TextStyle(
                       color: AppConstants.textSecondaryColor,
-                      fontSize: 11, // ✅ Smaller font: 12 → 11
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
-                    maxLines: 1, // ✅ Single line
-                    overflow: TextOverflow.ellipsis, // ✅ Handle overflow
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -244,10 +233,10 @@ class _MicButtonState extends State<_MicButton> with TickerProviderStateMixin {
                 _scaleAnimation.value *
                 (widget.isListening ? _pulseAnimation.value : 1.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // ✅ Minimize space
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 56, // ✅ Smaller than before: 72 → 56
+                  width: 56,
                   height: 56,
                   decoration: BoxDecoration(
                     color:
@@ -261,20 +250,19 @@ class _MicButtonState extends State<_MicButton> with TickerProviderStateMixin {
                                 ? AppConstants.errorColor
                                 : AppConstants.primaryColor)
                             .withOpacity(0.3),
-                        blurRadius: 8, // ✅ Reduced blur: 12 → 8
-                        offset: const Offset(0, 4), // ✅ Reduced offset: 6 → 4
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Icon(
                     widget.isListening ? Icons.stop : Icons.mic,
                     color: Colors.white,
-                    size: 24, // ✅ Smaller icon: 32 → 24
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 6), // ✅ Reduced spacing: 8 → 6
+                const SizedBox(height: 6),
                 Flexible(
-                  // ✅ Flexible text
                   child: Text(
                     widget.isListening ? 'Stop' : 'Speak',
                     style: TextStyle(
@@ -282,11 +270,11 @@ class _MicButtonState extends State<_MicButton> with TickerProviderStateMixin {
                           widget.isListening
                               ? AppConstants.errorColor
                               : AppConstants.textSecondaryColor,
-                      fontSize: 11, // ✅ Smaller font: 12 → 11
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
-                    maxLines: 1, // ✅ Single line
-                    overflow: TextOverflow.ellipsis, // ✅ Handle overflow
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -299,7 +287,6 @@ class _MicButtonState extends State<_MicButton> with TickerProviderStateMixin {
   }
 }
 
-// ✅ Alternative: Compact horizontal layout for very small screens
 class ActionButtonsCompact extends StatelessWidget {
   final bool isListening;
   final VoidCallback onMicPressed;
@@ -318,7 +305,7 @@ class ActionButtonsCompact extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 60, // ✅ Fixed compact height
+      height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: AppConstants.cardColor,

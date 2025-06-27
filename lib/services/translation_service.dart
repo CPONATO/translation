@@ -1,4 +1,3 @@
-// lib/services/translation_service.dart
 import 'dart:async';
 import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
 import 'package:google_mlkit_translation/google_mlkit_translation.dart';
@@ -137,11 +136,6 @@ class TranslationService {
       throw Exception('Text recognition failed: $e');
     }
   }
-
-  // XÓA method này vì không tồn tại trong API
-  // Future<List<String>> getAvailableModels() async {
-  //   return await _modelManager.getAvailableModels();
-  // }
 
   Future<bool> isModelDownloaded(String languageCode) async {
     return await _modelManager.isModelDownloaded(languageCode);

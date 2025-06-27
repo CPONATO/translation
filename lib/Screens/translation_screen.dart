@@ -38,8 +38,8 @@ class _TranslationScreenState extends State<TranslationScreen>
 
   // State
   LanguagePair _currentLanguagePair = const LanguagePair(
-    source: TranslateLanguage.english,
-    target: TranslateLanguage.vietnamese,
+    source: TranslateLanguage.vietnamese,
+    target: TranslateLanguage.english,
   );
 
   TranslationState _translationState = const TranslationState();
@@ -160,33 +160,27 @@ class _TranslationScreenState extends State<TranslationScreen>
     // Note: We'd need to trigger translation here for the swapped text
   }
 
-  // ✅ FIX: Logic chính ở đây
   Future<void> _startListening() async {
     if (!_speechService.speechEnabled) {
       _showErrorSnackBar('Speech recognition not available');
       return;
     }
 
-    // ✅ KEY FIX: Nếu auto-detect enabled, skip language check
     if (_isAutoDetectEnabled) {
       await _startListeningWithAutoDetect();
       return;
     }
 
-    // Manual mode: Check language support như bình thường
     await _startListeningWithManualLanguage();
   }
 
-  // ✅ Auto-detect mode: Always use English for speech recognition
   Future<void> _startListeningWithAutoDetect() async {
     setState(() {
       _isListening = true;
     });
 
-    // Use English as default for speech recognition in auto-detect mode
     String localeId = 'en_US';
 
-    // If English not supported, use first available locale
     if (!_speechService.isLocaleSupported(localeId)) {
       if (_speechService.availableLocales.isNotEmpty) {
         localeId = _speechService.availableLocales.first.localeId;
@@ -208,7 +202,6 @@ class _TranslationScreenState extends State<TranslationScreen>
     }
   }
 
-  // ✅ Manual mode: Check specific language support
   Future<void> _startListeningWithManualLanguage() async {
     setState(() {
       _isListening = true;
@@ -242,7 +235,6 @@ class _TranslationScreenState extends State<TranslationScreen>
     }
   }
 
-  // ✅ Speech result for auto-detect mode
   void _onSpeechResultAutoDetect(SpeechRecognitionResult result) {
     setState(() {
       _inputController.text = result.recognizedWords;
@@ -257,7 +249,7 @@ class _TranslationScreenState extends State<TranslationScreen>
     }
   }
 
-  // ✅ Speech result for manual mode
+  //  Speech result for manual mode
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       _inputController.text = result.recognizedWords;

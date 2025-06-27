@@ -1,11 +1,9 @@
-// lib/utils/image_utils.dart
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 class ImageUtils {
-  // FIX: Đổi return type thành Future<ui.Image>
   static Future<ui.Image> decodeImageFromFile(File file) async {
     final Uint8List bytes = await file.readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(bytes);
@@ -24,8 +22,6 @@ class ImageUtils {
     int maxHeight = 1080,
     int quality = 85,
   }) async {
-    // This is a placeholder implementation
-    // In a real app, you'd use packages like image or flutter_image_compress
     return file;
   }
 
